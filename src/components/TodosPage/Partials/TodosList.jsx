@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useContext } from "react";
 import { mainContext } from "../../../stores/Context";
 import TodoCard from "./TodoCard";
@@ -6,6 +6,11 @@ import { observer } from "mobx-react";
 
 const TodosList = () => {
   const { TodoStore } = useContext(mainContext);
+
+  useEffect(() => {
+    TodoStore.FetchTodos();
+  }, []);
+
   return (
     <div>
       {TodoStore.todos.map(t => (

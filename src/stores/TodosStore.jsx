@@ -1,31 +1,45 @@
-import { observable, action, computed, decorate, autorun } from "mobx";
+import {
+  observable,
+  action,
+  computed,
+  decorate,
+  autorun,
+  runInAction
+} from "mobx";
 
 class TodoStore {
-  todos = [
-    { id: 1, value: "Clean The Dishes", isCompleted: false },
-    { id: 2, value: "Finish Your Homewrok", isCompleted: true }
-  ];
+  todos = [];
 
   constructor() {
     autorun(() => console.log(this.Progress));
   }
 
   get Progress() {
+    if (this.todos.length === 0) return "0%";
     return `${(
-      this.todos.filter(t => t.isCompleted).length / this.todos.length
-    ).toFixed(1) * 100}%`;
+      this.todos.filter(t => t.completed).length / this.todos.length
+    ).toFixed(2) * 100}%`;
+  }
+
+  async FetchTodos() {
+    const res = await fetch("https://jsonplaceholder.typicode.com/todos");
+    const data = (await res.json()).slice(0, 6);
+    console.log(data);
+    runInAction(() => {
+      this.todos = data;
+    });
   }
 
   AddTodo(todo) {
     this.todos.push({
       id: this.todos.length + 1,
-      value: todo,
-      isCompleted: false
+      title: todo,
+      completed: false
     });
   }
 
   ToggleTodo(id) {
-    this.todos[id - 1].isCompleted = !this.todos[id - 1].isCompleted;
+    this.todos[id - 1].completed = !this.todos[id - 1].completed;
   }
 }
 
@@ -33,7 +47,8 @@ decorate(TodoStore, {
   todos: observable,
   AddTodo: action,
   Progress: computed,
-  ToggleTodo: action
+  ToggleTodo: action,
+  FetchTodos: action
 });
 
 const todoStoreInstance = new TodoStore();
